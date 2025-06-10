@@ -1,7 +1,12 @@
 let index = -1;
 const userInput = document.getElementById("userInput");
 const tokens = [];
-const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+const operators = [];
+const rpnExpresion = [];
+
+document.getElementById("userInput").addEventListener("input", function () {
+    this.value = this.value.replace(/[^0-9/*\-+()]/g, '');
+});
 
 document.getElementById("evaluate").addEventListener("click", function () {
     while (hasNext()) {
@@ -12,12 +17,20 @@ document.getElementById("evaluate").addEventListener("click", function () {
                 next();
                 str += userInput.value.charAt(index);
             }
-            tokens.push(str);
+            tokens.push({ type: "NUMBER", value: str });
         } else if (isOperator(userInput.value.charAt(index))) {
-            tokens.push(userInput.value.charAt(index));
+            tokens.push({ type: "OPERATOR", value: userInput.value.charAt(index) });
+        } else if (userInput.value.charAt(index) == "(") {
+            tokens.push({ type: "LPAREN", value: userInput.value.charAt(index) });
+        } else if (userInput.value.charAt(index) == ")") {
+            tokens.push({ type: "RPAREN", value: userInput.value.charAt(index) });
         }
     }
-    alert(tokens.toString());
+    toRPN();
+    //for (let i = 0; i < tokens.length; i++) {
+    //  alert(tokens[i].value + " " + tokens[i].type);
+    //}
+    alert(rpnExpresion.toString());
 });
 
 function hasNext() {
@@ -33,7 +46,7 @@ function ahead() {
 }
 
 function isNumber(number) {
-    return numbers[number] == parseInt(number);
+    return number >= "0" && number <= "9"
 }
 
 function isOperator(operator) {
@@ -46,7 +59,45 @@ function isOperator(operator) {
             return true;
         case "/":
             return true;
-        default:
-            return false;
+    }
+}
+
+function toRPN() {
+    for (let i = 0; i < tokens.length; i++) {
+        if (tokens[i].type == "NUMBER") {
+            rpnExpresion.push(tokens[i].value);
+        } else if (tokens[i].type == "LPAREN") {
+            operators.push(tokens[i].value);
+        } else {
+            if (operators.length == 0) {
+                operators.push(tokens[i].value);
+            } else {
+                if (tokens[i].value == "-" || tokens[i].value == "+") {
+                    tranfer();
+                    operators.push(tokens[i].value);
+                } else if (tokens[i].type == "RPAREN") {
+                    while (operators[operators.length - 1] != "(") {
+                        rpnExpresion.push(operators.pop());
+                    }
+                    operators.pop();
+                } else {
+                    if (operators[operators.length - 1] == "-" || operators[operators.length - 1] == "+") {
+                        operators.push(tokens[i].value);
+                    } else {
+                        tranfer();
+                        operators.push(tokens[i].value);
+                    }
+                }
+            }
+        }
+    }
+    while (operators.length != 0) {
+        rpnExpresion.push(operators.pop());
+    }
+}
+
+function tranfer() {
+    while (operators.length != 0 && operators[operators.length - 1] != "(") {
+        rpnExpresion.push(operators.pop());
     }
 }
