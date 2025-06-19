@@ -1,14 +1,25 @@
 let index = -1;
-const userInput = document.getElementById("userInput");
-const tokens = [];
-const operators = [];
-const rpnExpresion = [];
+let userInput = document.getElementById("userInput");
+let tokens = [];
+let operators = [];
+let rpnExpresion = [];
 
 document.getElementById("userInput").addEventListener("input", function () {
     this.value = this.value.replace(/[^0-9/*\-+()]/g, '');
 });
 
 document.getElementById("evaluate").addEventListener("click", function () {
+    tokenize();
+    toRPN();
+    //for (let i = 0; i < tokens.length; i++) {
+    //  alert(tokens[i].value + " " + tokens[i].type);
+    //}
+    evaluate();
+    alert(operators.pop());
+    reset();
+});
+
+function tokenize() {
     while (hasNext()) {
         next();
         if (isNumber(userInput.value.charAt(index))) {
@@ -26,12 +37,7 @@ document.getElementById("evaluate").addEventListener("click", function () {
             tokens.push({ type: "RPAREN", value: userInput.value.charAt(index) });
         }
     }
-    toRPN();
-    //for (let i = 0; i < tokens.length; i++) {
-    //  alert(tokens[i].value + " " + tokens[i].type);
-    //}
-    alert(rpnExpresion.toString());
-});
+}
 
 function hasNext() {
     return userInput.value.charAt(index + 1) != "";
@@ -100,4 +106,36 @@ function tranfer() {
     while (operators.length != 0 && operators[operators.length - 1] != "(") {
         rpnExpresion.push(operators.pop());
     }
+}
+
+function evaluate() {
+    for (let  i = 0; i < rpnExpresion.length; i++) {
+        if (isNumber(rpnExpresion[i])) {
+            operators.push(rpnExpresion[i]);
+        } else {
+            let temp = operators.pop();
+            operators.push(operation(rpnExpresion[i], operators.pop(), temp));
+        }
+    }
+}
+
+function operation(op, a, b) {
+    switch (op) {
+        case "+":
+            return parseFloat(a) + parseFloat(b);
+        case "-":
+            return a - b;
+        case "*":
+            return a * b;
+        case "/":
+            return a / b;
+    }
+}
+
+function reset() {
+    index = -1;
+    userInput = document.getElementById("userInput");
+    tokens = [];
+    operators = [];
+    rpnExpresion = [];
 }
