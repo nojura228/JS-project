@@ -134,7 +134,6 @@ function operation(op, a, b) {
 
 function reset() {
     index = -1;
-    userInput = document.getElementById("userInput");
     tokens = [];
     operators = [];
     rpnExpresion = [];
